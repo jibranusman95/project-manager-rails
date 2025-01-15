@@ -1,0 +1,67 @@
+name: GitHub Bot
+
+on:
+  schedule:
+    # Schedule the workflow to run periodically (e.g., every 6 hours)
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
+    # Allow manual triggering of the workflow
+    inputs:
+      run_reason:
+        description: "Reason for running the workflow"
+        required: false
+
+jobs:
+  bot-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set Up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install gitpython
+
+    - name: Run Bot Script
+      env:
+        GITHUB_ACTOR: jibranusman95
+        GITHUB_TOKEN: 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
+      run: |
+        python <<EOF
+        import os
+        import datetime
+        from git import Repo
+
+        REPO_PATH = os.getcwd()
+        repo = Repo(REPO_PATH)
+
+        # Set Git user details
+        with repo.config_writer() as config:
+            config.set_value("user", "name", jibranusman95)
+            config.set_value("user", "email", "jibran.usman@hotmail.com")
+
+        # Create or append to the file
+        file_path = os.path.join(REPO_PATH, "data.txt")
+        if not os.path.exists(file_path):
+            with open(file_path, "w") as file:
+                file.write("File created.\n")
+
+        with open(file_path, "a") as file:
+            file.write(f"Update: {datetime.datetime.now()}\n")
+
+        # Stage and commit changes
+        repo.git.add(all=True)
+        if repo.is_dirty():
+            repo.index.commit("Automated commit")
+            origin = repo.remote(name="origin")
+            origin.push()
+        else:
+            print("No changes to commit.")
+        EOF
