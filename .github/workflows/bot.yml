@@ -73,7 +73,7 @@ jobs:
         # Stage and commit changes
         repo.git.add(all=True)
         if repo.is_dirty():
-            repo.index.commit("Automated commit")
+            repo.index.commit("Updated timestamps")
             origin = repo.remote(name="origin")
             origin.push()
         else:
