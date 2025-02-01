@@ -41,7 +41,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install gitpython
+        pip install gitpython requests PyGithub
 
     - name: Run Bot Script
       env:
@@ -51,31 +51,68 @@ jobs:
         python <<EOF
         import os
         import datetime
+        import requests
         from git import Repo
+        from github import Github
 
         REPO_PATH = os.getcwd()
         repo = Repo(REPO_PATH)
 
         # Set Git user details
         with repo.config_writer() as config:
-            config.set_value("user", "name", "jibranusman95")
-            config.set_value("user", "email", "jibran.usman@hotmail.com")
+          config.set_value("user", "name", "jibranusman95")
+          config.set_value("user", "email", "jibran.usman@hotmail.com")
 
         # Create or append to the file
         file_path = os.path.join(REPO_PATH, "data.txt")
         if not os.path.exists(file_path):
-            with open(file_path, "w") as file:
-                file.write("File created.\n")
+          with open(file_path, "w") as file:
+            file.write("File created.\n")
 
         with open(file_path, "a") as file:
-            file.write(f"Update: {datetime.datetime.now()}\n")
+          file.write(f"Update: {datetime.datetime.now()}\n")
 
         # Stage and commit changes
         repo.git.add(all=True)
         if repo.is_dirty():
-            repo.index.commit("Updated timestamps")
-            origin = repo.remote(name="origin")
-            origin.push()
+          branch_name = f"update-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+          repo.git.checkout("-b", branch_name)
+          repo.index.commit("Updated timestamps")
+          origin = local_repo.remote(name="origin")
+          origin.push(refspec=f"{branch_name}:{branch_name}")
+
+          # Create a pull request
+          pr_title = "Timestamps PR: Update Data"
+          pr_body = "This PR was generated for timestamps."
+          pr_response = requests.post(
+              f"{API_URL}/pulls",
+              json={
+                  "title": pr_title,
+                  "body": pr_body,
+                  "head": branch_name,
+                  "base": "main"
+              },
+              headers={"Authorization": f"token {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}"}
+          )
+          print("PR Response:", pr_response.json())
         else:
-            print("No changes to commit.")
+          print("No changes to commit.")
+
+        issues = repo.get_issues(state="open")
+        if issues.totalCount == 0:
+          repo.create_issue(
+            title="Timestamp Issue",
+            body="This is a test timestamp issue."
+          )
+          print("Dummy issue created.")
+
+        for issue in repo.get_issues(state="open"):
+          if "Timestamp Issue" in issue.title:
+            issue.edit(state="closed")
+            print(f"Closed issue: {issue.title}")
+
+        for pr in repo.get_pulls(state="open"):
+          if "Timestamps PR" in pr.title:
+            pr.edit(state="closed")
+            print(f"Closed PR: {pr.title}")
         EOF
