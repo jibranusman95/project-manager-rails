@@ -7,17 +7,17 @@ on:
     # - cron: "0 10 * * 3-5"  # 10:00 AM UTC
     # - cron: "0 14 * * 1-2"  # 2:00 PM UTC
     # - cron: "0 18 * * 4-5"  # 6:00 PM UTC
-    - cron: "0 22 * * 2-6"  # 10:00 PM UTC
+    # - cron: "0 22 * * 2-6"  # 10:00 PM UTC
     # - cron: "0 2 * * 1-5"   # 2:00 AM UTC (next day)
 
     # Tuesday, Wednesday, Thursday - 3 times a day
     - cron: "0 8 * * 2-3"   # 8:00 AM UTC
-    - cron: "0 12 * * 3-4"  # 12:00 PM UTC
+    # - cron: "0 12 * * 3-4"  # 12:00 PM UTC
     # - cron: "0 16 * * 4"  # 4:00 PM UTC
 
     # Saturday - 2 times a day
-    - cron: "0 9 * * 6"     # 9:00 AM UTC
-    - cron: "0 15 * * 6"    # 3:00 PM UTC
+    # - cron: "0 9 * * 6"     # 9:00 AM UTC
+    # - cron: "0 15 * * 6"    # 3:00 PM UTC
   workflow_dispatch:
     # Allow manual triggering of the workflow
     inputs:
