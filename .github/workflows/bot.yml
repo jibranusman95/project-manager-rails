@@ -92,7 +92,7 @@ jobs:
                   "head": branch_name,
                   "base": "main"
               },
-              headers={"Authorization": f"token {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}"}
+              headers={"Authorization": "token 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"}
           )
           print("PR Response:", pr_response.json())
         else:
