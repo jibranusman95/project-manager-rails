@@ -92,7 +92,7 @@ jobs:
                   "head": branch_name,
                   "base": "main"
               },
-              headers={"Authorization": "token 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"}
+              headers={"Authorization": f"token {os.getenv('GITHUB_TOKEN')}"}
           )
           print("PR Response:", pr_response.json())
         else:
