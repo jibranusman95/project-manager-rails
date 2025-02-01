@@ -85,7 +85,7 @@ jobs:
           pr_title = "Timestamps PR: Update Data"
           pr_body = "This PR was generated for timestamps."
           pr_response = requests.post(
-              f"https://api.github.com/repos/jibranusman95/project-manager-rails/pulls",
+              "https://api.github.com/repos/jibranusman95/project-manager-rails/pulls",
               json={
                   "title": pr_title,
                   "body": pr_body,
