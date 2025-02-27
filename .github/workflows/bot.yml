@@ -16,7 +16,7 @@ on:
     # - cron: "0 16 * * 4"  # 4:00 PM UTC
 
     # Saturday - 2 times a day
-    # - cron: "0 9 * * 6"     # 9:00 AM UTC
+    - cron: "0 9 * * 6"     # 9:00 AM UTC
     - cron: "0 15 * * 6"    # 3:00 PM UTC
   workflow_dispatch:
     # Allow manual triggering of the workflow
