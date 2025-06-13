@@ -3,7 +3,7 @@ name: GitHub Bot
 on:
   schedule:
     # Weekdays (Monday to Friday) - 6 times a day
-    - cron: "0 6 * * 1"   # 6:00 AM UTC
+    - cron: "0 6 * * 2"   # 6:00 AM UTC
     # - cron: "0 10 * * 3-5"  # 10:00 AM UTC
     # - cron: "0 14 * * 1-2"  # 2:00 PM UTC
     # - cron: "0 18 * * 4-5"  # 6:00 PM UTC
