@@ -41,7 +41,7 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install gitpython
+        pip install gitpython wonderwords
 
     - name: Run Bot Script
       env:
