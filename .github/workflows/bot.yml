@@ -52,25 +52,26 @@ jobs:
         import os
         import datetime
         from git import Repo
-
+        from wonderwords import RandomSentence
+        
         REPO_PATH = os.getcwd()
         repo = Repo(REPO_PATH)
-
-        # Set Git user details
+        
         with repo.config_writer() as config:
             config.set_value("user", "name", "jibranusman95")
             config.set_value("user", "email", "jibran.usman@hotmail.com")
-
-        # Create or append to the file
+        
+        s = RandomSentence()
+        sentence = s.sentence()
+        
         file_path = os.path.join(REPO_PATH, "data.txt")
         if not os.path.exists(file_path):
             with open(file_path, "w") as file:
                 file.write("File created.\n")
-
+        
         with open(file_path, "a") as file:
-            file.write(f"Update: {datetime.datetime.now()}\n")
-
-        # Stage and commit changes
+            file.write(f"Update: {datetime.datetime.now()} — {sentence}\n")
+        
         repo.git.add(all=True)
         if repo.is_dirty():
             repo.index.commit("Updated timestamps")
