@@ -2,10 +2,24 @@ name: GitHub Bot
 
 on:
   schedule:
-    - cron: "0 14 * * 2"    # 2:00 PM UTC Tuesday
-    - cron: "0 9 * * 6"     # 9:00 AM UTC Saturday
-    - cron: "0 15 * * 6"    # 3:00 PM UTC Saturday
+    # Weekdays (Monday to Friday) - 6 times a day
+    # - cron: "0 6 * * 2"   # 6:00 AM UTC
+    # - cron: "0 10 * * 4-5"  # 10:00 AM UTC
+    - cron: "0 14 * * 2"  # 2:00 PM UTC
+    # - cron: "0 18 * * 4-5"  # 6:00 PM UTC
+    # - cron: "0 22 * * 2-6"  # 10:00 PM UTC
+    # - cron: "0 2 * * 1-5"   # 2:00 AM UTC (next day)
+
+    # Tuesday, Wednesday, Thursday - 3 times a day
+    # - cron: "0 8 * * 2-3"   # 8:00 AM UTC
+    # - cron: "0 12 * * 3-4"  # 12:00 PM UTC
+    # - cron: "0 16 * * 4"  # 4:00 PM UTC
+
+    # Saturday - 2 times a day
+    - cron: "0 9 * * 6"     # 9:00 AM UTC
+    - cron: "0 15 * * 6"    # 3:00 PM UTC
   workflow_dispatch:
+    # Allow manual triggering of the workflow
     inputs:
       run_reason:
         description: "Reason for running the workflow"
@@ -27,82 +41,109 @@ jobs:
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install gitpython wonderwords PyGithub
+        pip install gitpython wonderwords
 
     - name: Run Bot Script
       env:
         GITHUB_ACTOR: jibranusman95
-        GITHUB_TOKEN: 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
+        GITHUB_TOKEN: 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
       run: |
         python <<EOF
         import os
         import datetime
         from git import Repo
-        from github import Github
         from wonderwords import RandomSentence
-
+        
         REPO_PATH = os.getcwd()
-        TOKEN = os.getenv("GITHUB_TOKEN")
-        REPO_NAME = "jibranusman95/project-manager-rails"
-
-        # Local git setup
         repo = Repo(REPO_PATH)
+        
         with repo.config_writer() as config:
             config.set_value("user", "name", "jibranusman95")
             config.set_value("user", "email", "jibran.usman@hotmail.com")
-
-        # GitHub API setup
-        g = Github(TOKEN)
-        gh_repo = g.get_repo(REPO_NAME)
-
-        # --- Close old bot PRs and issues ---
-        for pr in gh_repo.get_pulls(state="open"):
-            if "Timestamps PR" in pr.title:
-                pr.edit(state="closed")
-                print(f"Closed old PR: {pr.title}")
-
-        for issue in gh_repo.get_issues(state="open"):
-            if "Timestamp Issue" in issue.title:
-                issue.edit(state="closed")
-                print(f"Closed old issue: {issue.title}")
-
-        # --- Make a file change with a random sentence ---
+        
         s = RandomSentence()
         sentence = s.sentence()
-
+        
         file_path = os.path.join(REPO_PATH, "data.txt")
         if not os.path.exists(file_path):
             with open(file_path, "w") as file:
                 file.write("File created.\n")
-
+        
         with open(file_path, "a") as file:
             file.write(f"Update: {datetime.datetime.now()} — {sentence}\n")
-
-        # --- Commit, branch, push ---
+        
         repo.git.add(all=True)
         if repo.is_dirty():
-            branch_name = f"update-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
-            repo.git.checkout("-b", branch_name)
-            repo.index.commit(f"Updated timestamps — {sentence}")
+            repo.index.commit("Updated timestamps")
             origin = repo.remote(name="origin")
-            origin.push(refspec=f"{branch_name}:{branch_name}")
-            print(f"Pushed branch: {branch_name}")
-
-            # --- Create PR ---
-            pr = gh_repo.create_pull(
-                title=f"Timestamps PR: {sentence}",
-                body=f"This PR was auto-generated.\n\nRandom sentence: {sentence}",
-                head=branch_name,
-                base="main"
-            )
-            print(f"Created PR #{pr.number}: {pr.title}")
-
-            # --- Create a tracking issue ---
-            issue = gh_repo.create_issue(
-                title=f"Timestamp Issue: {sentence}",
-                body=f"Tracking issue for PR #{pr.number}."
-            )
-            print(f"Created issue #{issue.number}: {issue.title}")
+            origin.push()
         else:
             print("No changes to commit.")
+
+        # import os
+        # import datetime
+        # import requests
+        # from git import Repo
+        # from github import Github
+
+        # REPO_PATH = os.getcwd()
+        # repo = Repo(REPO_PATH)
+
+        # # Set Git user details
+        # with repo.config_writer() as config:
+        #   config.set_value("user", "name", "jibranusman95")
+        #   config.set_value("user", "email", "jibran.usman@hotmail.com")
+
+        # # Create or append to the file
+        # file_path = os.path.join(REPO_PATH, "data.txt")
+        # if not os.path.exists(file_path):
+        #   with open(file_path, "w") as file:
+        #     file.write("File created.\n")
+
+        # with open(file_path, "a") as file:
+        #   file.write(f"Update: {datetime.datetime.now()}\n")
+
+        # # Stage and commit changes
+        # repo.git.add(all=True)
+        # if repo.is_dirty():
+        #   branch_name = f"update-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+        #   repo.git.checkout("-b", branch_name)
+        #   repo.index.commit("Updated timestamps")
+        #   origin = repo.remote(name="origin")
+        #   origin.push(refspec=f"{branch_name}:{branch_name}")
+
+        #   # Create a pull request
+        #   pr_title = "Timestamps PR: Update Data"
+        #   pr_body = "This PR was generated for timestamps."
+        #   pr_response = requests.post(
+        #       "https://api.github.com/repos/jibranusman95/project-manager-rails/pulls",
+        #       json={
+        #           "title": pr_title,
+        #           "body": pr_body,
+        #           "head": branch_name,
+        #           "base": "main"
+        #       },
+        #       headers={"Authorization": f"token {os.getenv('GITHUB_TOKEN')}"}
+        #   )
+        #   print("PR Response:", pr_response.json())
+        # else:
+        #   print("No changes to commit.")
+
+        # issues = repo.get_issues(state="open")
+        # if issues.totalCount == 0:
+        #   repo.create_issue(
+        #     title="Timestamp Issue",
+        #     body="This is a test timestamp issue."
+        #   )
+        #   print("Dummy issue created.")
+
+        # for issue in repo.get_issues(state="open"):
+        #   if "Timestamp Issue" in issue.title:
+        #     issue.edit(state="closed")
+        #     print(f"Closed issue: {issue.title}")
+
+        # for pr in repo.get_pulls(state="open"):
+        #   if "Timestamps PR" in pr.title:
+        #     pr.edit(state="closed")
+        #     print(f"Closed PR: {pr.title}")
         EOF
