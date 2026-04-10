@@ -32,7 +32,7 @@ jobs:
     - name: Run Bot Script
       env:
         GITHUB_ACTOR: jibranusman95
-        GITHUB_TOKEN: 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
+        GITHUB_TOKEN: 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
       run: |
         python <<EOF
         import os
